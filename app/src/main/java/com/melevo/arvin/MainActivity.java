@@ -1,93 +1,112 @@
 package com.melevo.arvin;
 
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-package com.melevo.arvin;
-
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity
 {
 
-    EditText editText;
-    TextView textView;
+    EditText eFname, eGender, eAge;
 
+    TextView tMsg;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+
+    protected void onCreate(Bundle savedInstanceState)
+
+    {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
-        editText = (EditText) findViewById(R.id.editText);
-        editText = (EditText) findViewById(R.id.editText2);
-        editText = (EditText) findViewById(R.id.editText3);
-        textView = (TextView) findViewById(R.id.textview);
-        textView = (TextView) findViewById(R.id.textview2);
-        textView = (TextView) findViewById(R.id.textview3);
+
+        eFname = findViewById(R.id.editText);
+
+        eGender = findViewById(R.id.editText2);
+
+        eAge = findViewById(R.id.editText3);
+
+        tMsg = findViewById(R.id.textView);
     }
 
-    public void Search(View view)
+    public void Save(View v)
     {
-        String Search = editText.getText().toString();
-        String file_name = "hello_file";
-        try {
-            FileOutputStream fileOutputStream = openFileOutput(file_name, MODE_PRIVATE);
-            fileOutputStream.write(Search.getBytes());
-            fileOutputStream.close();
-            Toast.makeText(getApplicationContext(), "Message Saved", Toast.LENGTH_LONG).show();
-            editText.setText("");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        FileOutputStream fos = null;
+        try
+        {
+            fos = openFileOutput("data2.txt", Context.MODE_PRIVATE);
+            String fname = eFname.getText().toString() + "\n";
+            String age = eAge.getText().toString() + "\n";
+            String gender = eGender.getText().toString() + "\n";
+            fos.write(fname.getBytes());
+            fos.write(age.getBytes());
+            fos.write(gender.getBytes());
+            Toast.makeText(this, "Data saved...", Toast.LENGTH_LONG).show();
+        }
+        catch (Exception e)
+        {
+            Toast.makeText(this, "Error writing data...", Toast.LENGTH_LONG).show();
+        }
+        finally
+        {
+            try
+            {
+                fos.close();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
 
-    public void Save(View view)
+    public void Search(View v)
+    {
+        SharedPreferences sp = getSharedPreferences("data1", Context.MODE_PRIVATE);
+
+        String name = sp.getString("name", null);
+
+        String section = sp.getString("sec", null);
+
+        String message = "Good afternoon " + name + "!\n\nYour section is " + section;
+
+        tMsg.setText(message);
+    }
+
+    public void textView(View v)
     {
         try
         {
-            String Search;
-            FileInputStream fileInputStream = openFileInput("hello_file");
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-            Buffered    Reader bufferedReader = new BufferedReader(inputStreamReader);
-            StringBuffer stringBuffer = new StringBuffer();
-            while ((Search=bufferedReader.readLine()) !=null)
+
+            FileInputStream fin = openFileInput("data2.txt" );
+
+            int c;
+
+            StringBuffer buffer = new StringBuffer();
+
+            while ((c = fin.read())!= -1)
+
             {
-                stringBuffer.append(Search + "\n");
+                buffer.append((char) c);
+
             }
-            textView.setText(stringBuffer.toString());
-            textView.setVisibility(View.VISIBLE);
-        }
 
-        catch (FileNotFoundException e)
+            String message = "" + buffer;
+
+            tMsg.setText(message);
+        }
+        catch (Exception e)
         {
-            e.printStackTrace();
+            Toast.makeText(this, "Error reading...", Toast.LENGTH_LONG).show();
         }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-
-    }
-}
-public class MainActivity extends AppCompatActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
     }
 }
